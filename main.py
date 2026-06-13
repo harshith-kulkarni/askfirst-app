@@ -96,42 +96,6 @@ def get_llm_client():
 
         return stream
 
-    elif provider == "groq":
-        from groq import Groq
-        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-        model = os.getenv("LLM_MODEL", "llama3-8b-8192")
-
-        def stream(messages):
-            response = client.chat.completions.create(
-                model=model, messages=messages, stream=True,
-            )
-            for chunk in response:
-                delta = chunk.choices[0].delta.content
-                if delta:
-                    yield delta
-
-        return stream
-
-    elif provider == "gemini":
-        import google.generativeai as genai
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model_name = os.getenv("LLM_MODEL", "gemini-1.5-flash")
-
-        def stream(messages):
-            mdl = genai.GenerativeModel(model_name)
-            history = []
-            for m in messages:
-                if m["role"] == "user":
-                    history.append({"role": "user", "parts": [m["content"]]})
-                elif m["role"] in ("assistant", "model"):
-                    history.append({"role": "model", "parts": [m["content"]]})
-            chat = mdl.start_chat(history=history[:-1] if history else [])
-            last_user = history[-1]["parts"][0] if history else ""
-            for chunk in chat.send_message(last_user, stream=True):
-                yield chunk.text
-
-        return stream
-
     else:
         raise ValueError(f"Unsupported LLM_PROVIDER: {provider}")
 

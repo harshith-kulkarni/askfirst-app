@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: askfirst-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: LLM_PROVIDER
+        value: openrouter
+      - key: LLM_MODEL
+        value: meta-llama/llama-3.1-8b-instruct
+      - key: OPENROUTER_API_KEY
+        sync: false        # you fill this in the Render dashboard
+      - key: APP_NAME
+        value: AskFirst AI
+      - key: DATABASE_URL
+        sync: false        # paste your Render Postgres URL here
